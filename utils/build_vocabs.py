@@ -13,17 +13,15 @@ class AnswerVocabulary(Vocabulary):
         words = self._build(input_dir, no_answers)
         super().__init__(words)
 
-    def _build(self, input_dir, no_answers):
-        datasets = os.listdir(input_dir)
+    def _build(self, annotation_file, no_answers):
         vocab_counter = dict()
 
-        for dataset in datasets:
-            with open(input_dir + '/' + dataset, 'r') as f:
-                annotations = json.load(f)['annotations']
-                for ann in annotations:
-                    for item in ann['answers']:
-                        answer = item['answer']
-                        vocab_counter[answer] = vocab_counter.get(answer, 0) + 1
+        with open(annotation_file, 'r') as f:
+            annotations = json.load(f)['annotations']
+            for ann in annotations:
+                for item in ann['answers']:
+                    answer = item['answer']
+                    vocab_counter[answer] = vocab_counter.get(answer, 0) + 1
 
         answers = sorted(vocab_counter, key=vocab_counter.get, reverse=True)
         top_answers = ['<unk>'] + answers[:no_answers - 1]
