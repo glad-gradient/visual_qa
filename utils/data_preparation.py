@@ -5,17 +5,16 @@ import numpy as np
 import torch
 from nltk.tokenize import word_tokenize
 
-from utils.build_vocabs import Vocabulary, AnswerVocabulary
-
 
 class DataGenerator(torch.utils.data.Dataset):
-    def __init__(self, data: list, question_tokens: list, answer_tokens: list, image_dir: str, mode: str, transform=None):
-        self.data = data
-        self.question_vocab = Vocabulary(question_tokens)
-        self.answer_vocab = AnswerVocabulary(answer_tokens)
-        self.image_dir = image_dir
+    def __init__(self, image_dir: str, mode: str,
+                 question_vocab, question_file, answer_vocab=None, annotation_file=None, transform=None):
         self.mode = mode
+        self.question_vocab = question_vocab
+        self.answer_vocab = answer_vocab
+        self.image_dir = image_dir
         self.transform = transform
+        self.data = self._prepare(question_file, annotation_file)
 
     def __len__(self) -> int:
         return len(self.data)
@@ -42,13 +41,12 @@ class DataGenerator(torch.utils.data.Dataset):
 
         return item
 
-    @staticmethod
-    def prepare(question_file, annotation_file, valid_answers, mode: str):
+    def _prepare(self, question_file, annotation_file):
         qst_id2ann = None
-        if mode in ['train', 'validation']:
+
+        if self.mode in ['train', 'validation']:
             with open(annotation_file) as f:
                 anns = json.load(f)['annotations']
-
             qst_id2ann = {ann['question_id']: ann for ann in anns}
 
         with open(question_file) as f:
@@ -67,7 +65,7 @@ class DataGenerator(torch.utils.data.Dataset):
             if qst_id2ann:
                 ann = qst_id2ann[question_id]
                 all_answers = [answer["answer"] for answer in ann['answers']]
-                _valid_answers = [a for a in all_answers if a in valid_answers]
+                _valid_answers = [a for a in all_answers if a in self.answer_vocab.word2idx]
                 if len(_valid_answers) == 0:
                     _valid_answers = ['<unk>']
 
@@ -77,7 +75,4 @@ class DataGenerator(torch.utils.data.Dataset):
             dataset.append(sample)
 
         return dataset
-
-
-
 
