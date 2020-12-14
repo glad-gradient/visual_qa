@@ -1,0 +1,1 @@
+# Download images from https://visualqa.org/download.html and save them here 
