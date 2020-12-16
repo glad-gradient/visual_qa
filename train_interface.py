@@ -11,10 +11,10 @@ import torch
 logging.basicConfig(level=logging.INFO)
 
 
-class Fitter:
-    def __init__(self, device, checkpoint_dir, log_path, verbose=True, verbose_step=1, model=None, optimizer=None, loss_fn=None, lr_scheduler=None, logger=None):
+class Trainer:
+    def __init__(self, device, checkpoint_dir, log_dir, verbose=True, verbose_step=1, model=None, optimizer=None, loss_fn=None, lr_scheduler=None, logger=None):
         self.checkpoint_dir = checkpoint_dir
-        self.log_path = log_path
+        self.log_path = log_dir + '/trainer.log'
         self.model = model
         self.loss_fn = loss_fn
         self.device = device
@@ -25,7 +25,7 @@ class Fitter:
         self.logger = logger if logger else logging.getLogger(self.__class__.__name__)
         self.verbose = verbose
         self.verbose_step = verbose_step
-        self.log(f'Fitter is ready. Device is {self.device}')
+        self.log(f'Trainer is ready. Device is {self.device}')
 
     def fit(self, train_loader, valid_loader, epochs):
         history = {'loss': list(), 'accuracy': list(), 'val_loss': list(), 'val_accuracy': list()}
@@ -64,6 +64,8 @@ class Fitter:
         plt.legend()
         plt.show()
 
+        plt.savefig('loss.jpg')
+
         plt.plot(history['accuracy'], label='train')
         plt.plot(history['val_accuracy'], label='valid')
         plt.xlabel('Epoch')
@@ -71,6 +73,8 @@ class Fitter:
         plt.title('Accuracy Over Time')
         plt.legend()
         plt.show()
+
+        plt.savefig('accuracy.jpg')
 
     def train_one_epoch(self, train_loader):
         self.model.train()
@@ -92,7 +96,7 @@ class Fitter:
 
             answers_ids = answers_ids.detach().numpy()
             answers_ids = answers_ids.reshape(len(answers_ids), 1)
-            actual_answers = np.array(batch_sample['actual_answers'])
+            actual_answers = batch_sample['actual_answers']
 
             # calculate step accuracy
             # acc = min(humans that provided that answer / 3, 1)
@@ -106,8 +110,6 @@ class Fitter:
             loss_summary += loss
 
             self.optimizer.step()
-
-            self.lr_scheduler.step()
 
             if self.verbose:
                 if step % self.verbose_step == 0:
@@ -166,6 +168,8 @@ class Fitter:
         accuracy = total / len(valid_loader.dataset)
         # epoch loss
         loss_summary = loss_summary / no_steps
+
+        self.lr_scheduler.step(loss_summary)
 
         return loss_summary, accuracy
 
