@@ -1,4 +1,3 @@
-import os
 import json
 
 
@@ -6,6 +5,7 @@ class Vocabulary:
     def __init__(self, words):
         self.word2idx = {w: i for i, w in enumerate(words)}
         self.idx2word = dict([(value, key) for key, value in self.word2idx.items()])
+        self.size = len(words)
 
 
 class AnswerVocabulary(Vocabulary):
