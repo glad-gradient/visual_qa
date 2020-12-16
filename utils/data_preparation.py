@@ -1,18 +1,71 @@
 import json
+import os
 
 import cv2
 import numpy as np
 import torch
 from nltk.tokenize import word_tokenize
 
+from utils.misc import configs
+
+
+def download_vqa(load_test=False):
+    cfgs = configs()
+    image_dir = cfgs['PATH']['IMAGE_DIR']
+    question_dir = cfgs['PATH']['QUESTION_DIR']
+    answer_dir = cfgs['PATH']['ANSWER_DIR']
+    link = cfgs['LINK']
+    image_link = cfgs['IMAGE_LINK']
+
+    os.makedirs(f'{image_dir}/train/', exist_ok=True)
+    os.makedirs(f'{image_dir}/validation/', exist_ok=True)
+    os.makedirs(f'{image_dir}/test/', exist_ok=True)
+
+    # Download and unzip images
+    if not os.path.exists(f'{image_dir}/train2014.zip'):
+        os.system(f'wget {image_link}/train2014.zip -P {image_dir}')
+        os.system(f'unzip {image_dir}/train2014.zip -d {image_dir}/train/')
+
+    if not os.path.exists(f'{image_dir}/val2014.zip'):
+        os.system(f'wget {image_link}/val2014.zip -P {image_dir}')
+        os.system(f'unzip {image_dir}/val2014.zip -d {image_dir}/validation/')
+
+    if load_test and not os.path.exists(f'{image_dir}/test2015.zip'):
+        os.system(f'wget {image_link}/test2015.zip -P {image_dir}')
+        os.system(f'unzip {image_dir}/test2015.zip -d {image_dir}/test/')
+
+    # Download and unzip the VQA Questions
+    if not os.path.exists(f'{question_dir}/v2_Questions_Train_mscoco.zip'):
+        os.system(f'wget {link}/v2_Questions_Train_mscoco.zip -P {question_dir}')
+        os.system(f'unzip {question_dir}/v2_Questions_Train_mscoco.zip -d {question_dir}')
+
+    if not os.path.exists(f'{question_dir}/v2_Questions_Val_mscoco.zip'):
+        os.system(f'wget {link}/v2_Questions_Val_mscoco.zip -P {question_dir}')
+        os.system(f'unzip {question_dir}/v2_Questions_Val_mscoco.zip -d {question_dir}')
+
+    if load_test and not os.path.exists(f'{question_dir}/v2_Questions_Test_mscoco.zip'):
+        os.system(f'wget {link}/v2_Questions_Test_mscoco.zip -P {question_dir}')
+        os.system(f'unzip {question_dir}/v2_Questions_Test_mscoco.zip -d {question_dir}')
+
+    # Download and unzip the VQA Annotations
+    if not os.path.exists(f'{answer_dir}/v2_Annotations_Train_mscoco.zip'):
+        os.system(f'wget {link}/v2_Annotations_Train_mscoco.zip -P {answer_dir}')
+        os.system(f'unzip {answer_dir}/v2_Annotations_Train_mscoco.zip -d {answer_dir}')
+
+    if not os.path.exists(f'{answer_dir}/v2_Annotations_Val_mscoco.zip'):
+        os.system(f'wget {link}/v2_Annotations_Val_mscoco.zip -P {answer_dir}')
+        os.system(f'unzip {answer_dir}/v2_Annotations_Val_mscoco.zip -d {answer_dir}')
+
 
 class DataGenerator(torch.utils.data.Dataset):
-    def __init__(self, image_dir: str, mode: str,
-                 question_vocab, question_file, answer_vocab=None, annotation_file=None, transform=None):
+    def __init__(self, image_dir: str, image_size: int, mode: str,
+                 question_vocab, question_file, max_num_ans=10, answer_vocab=None, annotation_file=None, transform=None):
         self.mode = mode
         self.question_vocab = question_vocab
         self.answer_vocab = answer_vocab
-        self.image_dir = image_dir
+        self.max_num_ans = max_num_ans
+        self.image_dir = f'{image_dir}{mode}/'
+        self.image_size = image_size
         self.transform = transform
         self.data = self._prepare(question_file, annotation_file)
 
@@ -25,6 +78,8 @@ class DataGenerator(torch.utils.data.Dataset):
         image_id = sample['image_id']
         image = cv2.imread(f'{self.image_dir}/{image_id}.jpg', cv2.IMREAD_COLOR)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB).astype(np.float32)
+        _img = cv2.resize(image, (self.image_size, self.image_size))
+        image /= 255.0
         if self.transform:
             image = self.transform(image)
 
@@ -37,7 +92,10 @@ class DataGenerator(torch.utils.data.Dataset):
         if self.mode in ['train', 'validation']:
             answers_ids = [self.answer_vocab.word2idx[ans] for ans in sample['valid_answers']]
             answer_idx = np.random.choice(answers_ids)
-            item['answer_label'] = answer_idx
+            item['answer'] = answer_idx
+            actual_answers = np.array([answer_idx]*self.max_num_ans)
+            actual_answers[: len(answers_ids)] = answers_ids
+            item['actual_answers'] = actual_answers
 
         return item
 
