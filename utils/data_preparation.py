@@ -27,7 +27,8 @@ def download_vqa(config_file, load_train=True, load_valid=True, load_test=False)
         os.system(f'unzip {image_dir}/train2014.zip -d {image_dir}/train/')
 
     if load_valid and not os.path.exists(f'{image_dir}/val2014.zip'):
-        os.system(f'wget {image_link}/val2014.zip -P {image_dir}')
+        os.system(f'wget http://images.cocodataset.org/zips/val2014.zip -P {image_dir}')
+        # os.system(f'wget {image_link}/val2014.zip -P {image_dir}')
         os.system(f'unzip {image_dir}/val2014.zip -d {image_dir}/validation/')
 
     if load_test and not os.path.exists(f'{image_dir}/test2015.zip'):
@@ -40,7 +41,8 @@ def download_vqa(config_file, load_train=True, load_valid=True, load_test=False)
         os.system(f'unzip {question_dir}/v2_Questions_Train_mscoco.zip -d {question_dir}')
 
     if load_valid and not os.path.exists(f'{question_dir}/v2_Questions_Val_mscoco.zip'):
-        os.system(f'wget {link}/v2_Questions_Val_mscoco.zip -P {question_dir}')
+        os.system(f'wget https://s3.amazonaws.com/cvmlp/vqa/mscoco/vqa/v2_Questions_Val_mscoco.zip -P {question_dir}')
+        # os.system(f'wget {link}/v2_Questions_Val_mscoco.zip -P {question_dir}')
         os.system(f'unzip {question_dir}/v2_Questions_Val_mscoco.zip -d {question_dir}')
 
     if load_test and not os.path.exists(f'{question_dir}/v2_Questions_Test_mscoco.zip'):
@@ -53,7 +55,8 @@ def download_vqa(config_file, load_train=True, load_valid=True, load_test=False)
         os.system(f'unzip {answer_dir}/v2_Annotations_Train_mscoco.zip -d {answer_dir}')
 
     if load_valid and not os.path.exists(f'{answer_dir}/v2_Annotations_Val_mscoco.zip'):
-        os.system(f'wget {link}/v2_Annotations_Val_mscoco.zip -P {answer_dir}')
+        os.system(f'wget https://s3.amazonaws.com/cvmlp/vqa/mscoco/vqa/v2_Annotations_Val_mscoco.zip -P {answer_dir}')
+        # os.system(f'wget {link}/v2_Annotations_Val_mscoco.zip -P {answer_dir}')
         os.system(f'unzip {answer_dir}/v2_Annotations_Val_mscoco.zip -d {answer_dir}')
 
 
