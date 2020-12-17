@@ -1,9 +1,9 @@
 {
   "PATH":
   {
-    "IMAGE_DIR": "visual_qa/data/images/",
-    "QUESTION_DIR":  "visual_qa/data/questions/",
-    "ANSWER_DIR": "visual_qa/data/answers/"
+    "IMAGE_DIR": "visual_qa/data/images",
+    "QUESTION_DIR":  "visual_qa/data/questions",
+    "ANSWER_DIR": "visual_qa/data/answers"
   },
   "IMAGE_LINK": "http://images.cocodataset.org/zips/",
   "LINK": "https://s3.amazonaws.com/cvmlp/vqa/mscoco/vqa/",
