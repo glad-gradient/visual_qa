@@ -3,7 +3,7 @@ import json
 
 class Vocabulary:
     def __init__(self, words):
-        self.word2idx = {w: i for i, w in enumerate(words)}
+        self.word2idx = {w.lower(): i for i, w in enumerate(words)}
         self.idx2word = dict([(value, key) for key, value in self.word2idx.items()])
         self.size = len(words)
 
@@ -20,7 +20,7 @@ class AnswerVocabulary(Vocabulary):
             annotations = json.load(f)['annotations']
             for ann in annotations:
                 for item in ann['answers']:
-                    answer = item['answer']
+                    answer = item['answer'].lower()
                     vocab_counter[answer] = vocab_counter.get(answer, 0) + 1
 
         answers = sorted(vocab_counter, key=vocab_counter.get, reverse=True)
