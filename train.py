@@ -32,14 +32,14 @@ def main(args):
     verbose = args.verbose
     max_num_ans = args.max_num_ans
 
-    cfgs = configs()
+    cfgs = configs(config_file=args.config_file)
     hidden_dim = cfgs['MODEL_SETTINGS']['HIDDEN_DIM']
     embedding_dim = cfgs['MODEL_SETTINGS']['EMBEDDING_DIM']
     num_layers = cfgs['MODEL_SETTINGS']['NUM_LAYERS']
 
-    lr = cfgs['OPTIMIZER_SETTINGS']['LR']             # learning rate
-    momentum = cfgs['OPTIMIZER_SETTINGS']['MOMENTUM']
-    weight_decay = cfgs['OPTIMIZER_SETTINGS']['WEIGHT_DECAY']
+    lr = args.lr
+    momentum = args.momentum
+    weight_decay = args.weight_decay
 
     logger.info(f'Word embedding model "{cfgs["WORD_EMBEDDING_MODEL_NAME"]}" downloading...')
     word2vec = downloader.load(cfgs['WORD_EMBEDDING_MODEL_NAME'])
@@ -47,9 +47,9 @@ def main(args):
 
     logger.info('Vocabularies building...')
 
-    word_list = word2vec.index2word
+    word_list = word2vec.index_to_key
     question_vocab = Vocabulary(word_list)
-    train_annotation_file = cfgs['PATH']['ANSWER_DIR'] + 'v2_mscoco_val2014_annotations.json'
+    train_annotation_file = cfgs['PATH']['ANSWER_DIR'] + '/v2_mscoco_train2014_annotations.json'
     answer_vocab = AnswerVocabulary(train_annotation_file, no_answers)  # only train data
 
     logger.info('Vocabularies have been builded.')
@@ -60,10 +60,11 @@ def main(args):
 
     train_dataset = DataGenerator(
         image_dir=cfgs['PATH']['IMAGE_DIR'],
+        image_set='train2014',
         image_size=image_size,
         mode=Modes.TRAIN,
         question_vocab=question_vocab,
-        question_file=cfgs['PATH']['QUESTION_DIR'] + 'v2_OpenEnded_mscoco_train2014_questions.json',
+        question_file=cfgs['PATH']['QUESTION_DIR'] + '/v2_OpenEnded_mscoco_train2014_questions.json',
         answer_vocab=answer_vocab,
         annotation_file=train_annotation_file,
         transform=transform,
@@ -73,12 +74,13 @@ def main(args):
 
     validation_dataset = DataGenerator(
         image_dir=cfgs['PATH']['IMAGE_DIR'],
+        image_set='val2014',
         image_size=image_size,
         mode=Modes.VALIDATION,
         question_vocab=question_vocab,
-        question_file=cfgs['PATH']['QUESTION_DIR'] + 'v2_OpenEnded_mscoco_val2014_questions.json',
+        question_file=cfgs['PATH']['QUESTION_DIR'] + '/v2_OpenEnded_mscoco_val2014_questions.json',
         answer_vocab=answer_vocab,
-        annotation_file=cfgs['PATH']['ANSWER_DIR'] + 'v2_mscoco_val2014_annotations.json',
+        annotation_file=cfgs['PATH']['ANSWER_DIR'] + '/v2_mscoco_val2014_annotations.json',
         transform=transform,
         max_num_ans=max_num_ans
     )
@@ -155,24 +157,23 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--checkpoint_dir', type=str, default='./checkpoints', help='directory for model checkpoints')
-
     parser.add_argument('--log_dir', type=str, default='./logs', help='directory for logs')
+    parser.add_argument('--config_file', type=str, default='./configs.json', help='path to the config file')
+
+    parser.add_argument('--lr', type=float, default=0.001, help='learning rate for training')
+    parser.add_argument('--momentum', type=float, default=0.9, help='SGD momentum')
+    parser.add_argument('--weight_decay', type=float, default=0.0005, help='SGD weight decay')
 
     parser.add_argument('--image_size', type=int, default=224, help='output image size')
-
     parser.add_argument('--batch_size', type=int, default=256, help='batch size')
-
     parser.add_argument('--num_epochs', type=int, default=30, help='number of epochs')
+    parser.add_argument('--num_workers', type=int, default=cpu_count(), help='number of processes working on cpu')
 
     parser.add_argument('--no_answers', type=int, default=1000, help='the number of answers to be kept in vocab')
-
-    parser.add_argument('--max_num_ans', type=int, default=10, help='maximum number of answers')
+    parser.add_argument('--max_num_ans', type=int, default=10, help='maximum number of answers per question')
 
     parser.add_argument('--verbose_step', type=int, default=1, help='period of verbose step')
-
     parser.add_argument('--verbose', type=bool, default=True, help='verbose')
-
-    parser.add_argument('--num_workers', type=int, default=cpu_count(), help='number of processes working on cpu.')
 
     args = parser.parse_args()
 
