@@ -14,49 +14,40 @@ def download_vqa(config_file, load_train=True, load_valid=True, load_test=False)
     image_dir = cfgs['PATH']['IMAGE_DIR']
     question_dir = cfgs['PATH']['QUESTION_DIR']
     answer_dir = cfgs['PATH']['ANSWER_DIR']
-    link = cfgs['LINK']
-    image_link = cfgs['IMAGE_LINK']
-
-    # os.makedirs(f'{image_dir}/train/', exist_ok=True)
-    # os.makedirs(f'{image_dir}/validation/', exist_ok=True)
-    # os.makedirs(f'{image_dir}/test/', exist_ok=True)
 
     # Download and unzip images
-    if load_train and not os.path.exists(f'{image_dir}/train2014.zip'):
-        os.system(f'wget {image_link}/train2014.zip -P {image_dir}')
+    if load_train:
+        os.system(f'wget http://images.cocodataset.org/zips/train2014.zip -P {image_dir}')
         os.system(f'unzip {image_dir}/train2014.zip -d {image_dir}/')
 
-    if load_valid and not os.path.exists(f'{image_dir}/val2014.zip'):
+    if load_valid:
         os.system(f'wget http://images.cocodataset.org/zips/val2014.zip -P {image_dir}')
-        # os.system(f'wget {image_link}/val2014.zip -P {image_dir}')
         os.system(f'unzip {image_dir}/val2014.zip -d {image_dir}/')
 
-    if load_test and not os.path.exists(f'{image_dir}/test2015.zip'):
-        os.system(f'wget {image_link}/test2015.zip -P {image_dir}')
+    if load_test:
+        os.system(f'wget http://images.cocodataset.org/zips/test2015.zip -P {image_dir}')
         os.system(f'unzip {image_dir}/test2015.zip -d {image_dir}/')
 
     # Download and unzip the VQA Questions
-    if load_train and not os.path.exists(f'{question_dir}/v2_Questions_Train_mscoco.zip'):
-        os.system(f'wget {link}/v2_Questions_Train_mscoco.zip -P {question_dir}')
+    if load_train:
+        os.system(f'wget https://s3.amazonaws.com/cvmlp/vqa/mscoco/vqa/v2_Questions_Train_mscoco.zip -P {question_dir}')
         os.system(f'unzip {question_dir}/v2_Questions_Train_mscoco.zip -d {question_dir}')
 
-    if load_valid and not os.path.exists(f'{question_dir}/v2_Questions_Val_mscoco.zip'):
+    if load_valid:
         os.system(f'wget https://s3.amazonaws.com/cvmlp/vqa/mscoco/vqa/v2_Questions_Val_mscoco.zip -P {question_dir}')
-        # os.system(f'wget {link}/v2_Questions_Val_mscoco.zip -P {question_dir}')
         os.system(f'unzip {question_dir}/v2_Questions_Val_mscoco.zip -d {question_dir}')
 
-    if load_test and not os.path.exists(f'{question_dir}/v2_Questions_Test_mscoco.zip'):
-        os.system(f'wget {link}/v2_Questions_Test_mscoco.zip -P {question_dir}')
+    if load_test:
+        os.system(f'wget https://s3.amazonaws.com/cvmlp/vqa/mscoco/vqa/v2_Questions_Test_mscoco.zip -P {question_dir}')
         os.system(f'unzip {question_dir}/v2_Questions_Test_mscoco.zip -d {question_dir}')
 
     # Download and unzip the VQA Annotations
-    if load_train and not os.path.exists(f'{answer_dir}/v2_Annotations_Train_mscoco.zip'):
-        os.system(f'wget {link}/v2_Annotations_Train_mscoco.zip -P {answer_dir}')
+    if load_train:
+        os.system(f'wget https://s3.amazonaws.com/cvmlp/vqa/mscoco/vqa/v2_Annotations_Train_mscoco.zip -P {answer_dir}')
         os.system(f'unzip {answer_dir}/v2_Annotations_Train_mscoco.zip -d {answer_dir}')
 
-    if load_valid and not os.path.exists(f'{answer_dir}/v2_Annotations_Val_mscoco.zip'):
+    if load_valid:
         os.system(f'wget https://s3.amazonaws.com/cvmlp/vqa/mscoco/vqa/v2_Annotations_Val_mscoco.zip -P {answer_dir}')
-        # os.system(f'wget {link}/v2_Annotations_Val_mscoco.zip -P {answer_dir}')
         os.system(f'unzip {answer_dir}/v2_Annotations_Val_mscoco.zip -d {answer_dir}')
 
 
@@ -81,7 +72,6 @@ class DataGenerator(torch.utils.data.Dataset):
 
         image_id = sample['image_id']
         img_file = f'{self.image_dir}/COCO_{self.image_set}_{image_id:012d}.jpg'
-        print(img_file)
         image = cv2.imread(img_file, cv2.IMREAD_COLOR)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB).astype(np.float32)
         image = cv2.resize(image, (self.image_size, self.image_size))
@@ -123,12 +113,12 @@ class DataGenerator(torch.utils.data.Dataset):
             sample = {
                 'image_id': q['image_id'],
                 'question_id': question_id,
-                'question': q['question']
+                'question': q['question'].lower()
             }
 
             if qst_id2ann:
                 ann = qst_id2ann[question_id]
-                all_answers = [answer["answer"] for answer in ann['answers']]
+                all_answers = [answer["answer"].lower() for answer in ann['answers']]
                 _valid_answers = [a for a in all_answers if a in self.answer_vocab.word2idx]
                 if len(_valid_answers) == 0:
                     _valid_answers = ['<unk>']
