@@ -6,9 +6,9 @@ logger = logging.getLogger('configs')
 logging.basicConfig(level=logging.INFO)
 
 
-def configs():
-    if not os.path.exists('configs.json'):
-        logger.warning(f"The configs.json file does not exist!")
+def configs(config_file):
+    if not os.path.exists(config_file):
+        logger.warning(f"The {config_file} file does not exist!")
         return
-    with open('configs.json') as f:
+    with open(config_file) as f:
         return json.load(f)
