@@ -7,9 +7,10 @@ import torch
 from nltk.tokenize import word_tokenize
 
 from utils.misc import configs
+from utils.enums import Modes
 
 
-def download_vqa(load_test=False):
+def download_vqa(load_train=True, load_valid=True, load_test=False):
     cfgs = configs()
     image_dir = cfgs['PATH']['IMAGE_DIR']
     question_dir = cfgs['PATH']['QUESTION_DIR']
@@ -22,11 +23,11 @@ def download_vqa(load_test=False):
     os.makedirs(f'{image_dir}/test/', exist_ok=True)
 
     # Download and unzip images
-    if not os.path.exists(f'{image_dir}/train2014.zip'):
+    if load_train and not os.path.exists(f'{image_dir}/train2014.zip'):
         os.system(f'wget {image_link}/train2014.zip -P {image_dir}')
         os.system(f'unzip {image_dir}/train2014.zip -d {image_dir}/train/')
 
-    if not os.path.exists(f'{image_dir}/val2014.zip'):
+    if load_valid and not os.path.exists(f'{image_dir}/val2014.zip'):
         os.system(f'wget {image_link}/val2014.zip -P {image_dir}')
         os.system(f'unzip {image_dir}/val2014.zip -d {image_dir}/validation/')
 
@@ -35,11 +36,11 @@ def download_vqa(load_test=False):
         os.system(f'unzip {image_dir}/test2015.zip -d {image_dir}/test/')
 
     # Download and unzip the VQA Questions
-    if not os.path.exists(f'{question_dir}/v2_Questions_Train_mscoco.zip'):
+    if load_train and not os.path.exists(f'{question_dir}/v2_Questions_Train_mscoco.zip'):
         os.system(f'wget {link}/v2_Questions_Train_mscoco.zip -P {question_dir}')
         os.system(f'unzip {question_dir}/v2_Questions_Train_mscoco.zip -d {question_dir}')
 
-    if not os.path.exists(f'{question_dir}/v2_Questions_Val_mscoco.zip'):
+    if load_valid and not os.path.exists(f'{question_dir}/v2_Questions_Val_mscoco.zip'):
         os.system(f'wget {link}/v2_Questions_Val_mscoco.zip -P {question_dir}')
         os.system(f'unzip {question_dir}/v2_Questions_Val_mscoco.zip -d {question_dir}')
 
@@ -48,11 +49,11 @@ def download_vqa(load_test=False):
         os.system(f'unzip {question_dir}/v2_Questions_Test_mscoco.zip -d {question_dir}')
 
     # Download and unzip the VQA Annotations
-    if not os.path.exists(f'{answer_dir}/v2_Annotations_Train_mscoco.zip'):
+    if load_train and not os.path.exists(f'{answer_dir}/v2_Annotations_Train_mscoco.zip'):
         os.system(f'wget {link}/v2_Annotations_Train_mscoco.zip -P {answer_dir}')
         os.system(f'unzip {answer_dir}/v2_Annotations_Train_mscoco.zip -d {answer_dir}')
 
-    if not os.path.exists(f'{answer_dir}/v2_Annotations_Val_mscoco.zip'):
+    if load_valid and not os.path.exists(f'{answer_dir}/v2_Annotations_Val_mscoco.zip'):
         os.system(f'wget {link}/v2_Annotations_Val_mscoco.zip -P {answer_dir}')
         os.system(f'unzip {answer_dir}/v2_Annotations_Val_mscoco.zip -d {answer_dir}')
 
