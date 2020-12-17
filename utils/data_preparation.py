@@ -7,11 +7,10 @@ import torch
 from nltk.tokenize import word_tokenize
 
 from utils.misc import configs
-from utils.enums import Modes
 
 
-def download_vqa(load_train=True, load_valid=True, load_test=False):
-    cfgs = configs()
+def download_vqa(config_file, load_train=True, load_valid=True, load_test=False):
+    cfgs = configs(config_file)
     image_dir = cfgs['PATH']['IMAGE_DIR']
     question_dir = cfgs['PATH']['QUESTION_DIR']
     answer_dir = cfgs['PATH']['ANSWER_DIR']
