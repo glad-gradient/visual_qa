@@ -5,17 +5,10 @@
     "QUESTION_DIR":  "visual_qa/data/questions",
     "ANSWER_DIR": "visual_qa/data/answers"
   },
-  "IMAGE_LINK": "http://images.cocodataset.org/zips/",
-  "LINK": "https://s3.amazonaws.com/cvmlp/vqa/mscoco/vqa/",
   "WORD_EMBEDDING_MODEL_NAME": "word2vec-google-news-300",
   "MODEL_SETTINGS": {
     "HIDDEN_DIM": 512,
     "EMBEDDING_DIM": 1024,
     "NUM_LAYERS": 2
-  },
-  "OPTIMIZER_SETTINGS": {
-    "LR": 0.001,
-    "MOMENTUM": 0.9,
-    "WEIGHT_DECAY": 0.0005
   }
 }
