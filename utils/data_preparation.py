@@ -80,11 +80,11 @@ class DataGenerator(torch.utils.data.Dataset):
         sample = self.data[idx]
 
         image_id = sample['image_id']
-        img_file = f'{self.image_dir}/COCO_{self.image_set}_{image_id}.jpg'
+        img_file = f'{self.image_dir}/COCO_{self.image_set}_{image_id:012d}.jpg'
         print(img_file)
         image = cv2.imread(img_file, cv2.IMREAD_COLOR)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB).astype(np.float32)
-        _img = cv2.resize(image, (self.image_size, self.image_size))
+        image = cv2.resize(image, (self.image_size, self.image_size))
         image /= 255.0
         if self.transform:
             image = self.transform(image)
