@@ -8,15 +8,13 @@ class ImageEncoder(torch.nn.Module):
         pretrained_model = torchvision.models.resnet34(pretrained=True)
         in_features = pretrained_model.fc.in_features  # 512
 
-        self.model = torch.nn.Sequential(*list(pretrained_model.children())[:-1])
         for param in self.model.parameters():
             param.requires_grad = False
 
-        self.fc = torch.nn.Linear(in_features, embedding_dim)
+        self.model.fc = torch.nn.Sequential(torch.nn.Linear(in_features, embedding_dim))
 
     def forward(self, image):
         features = self.model(image)
-        features = self.fc(features)
         l2_norm = torch.linalg.norm(features, ord=2, dim=1, keepdim=True).detach()
         features = features.div(l2_norm)
         return features
@@ -25,7 +23,7 @@ class ImageEncoder(torch.nn.Module):
 class QuestionEncoder(torch.nn.Module):
     def __init__(self, word_embeddings, word_embedding_dim, hidden_dim, num_layers, embedding_dim):
         super(QuestionEncoder, self).__init__()
-        self.word_embeddings = torch.nn.Embedding.from_pretrained(word_embeddings)
+        self.word_embeddings = torch.nn.Embedding.from_pretrained(word_embeddings, freeze=True)
         self.lstm = torch.nn.LSTM(
             input_size=word_embedding_dim,
             hidden_size=hidden_dim,
