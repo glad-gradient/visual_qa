@@ -53,9 +53,11 @@ def download_vqa(config_file, load_train=True, load_valid=True, load_test=False)
 
 class DataGenerator(torch.utils.data.Dataset):
     def __init__(self, image_dir: str, image_set: str, image_size: int, mode: str,
-                 question_vocab, question_file, max_num_ans=10, answer_vocab=None, annotation_file=None, transform=None):
+                 question_vocab, question_file, max_qst_length=30, max_num_ans=10,
+                 answer_vocab=None, annotation_file=None, transform=None):
         self.mode = mode
         self.question_vocab = question_vocab
+        self.max_qst_length = max_qst_length
         self.answer_vocab = answer_vocab
         self.max_num_ans = max_num_ans
         self.image_set = image_set
@@ -80,7 +82,10 @@ class DataGenerator(torch.utils.data.Dataset):
             image = self.transform(image)
 
         tokens = word_tokenize(sample['question'])
-        question_ids = [self.question_vocab.word2idx[t] for t in tokens if t in self.question_vocab.word2idx]
+        question_ids = np.array([0] * self.max_qst_length)
+        question_ids[: len(tokens)] = [self.question_vocab.word2idx[t]
+                                       if t in self.question_vocab.word2idx else 0.
+                                       for t in tokens]
         question_ids = torch.LongTensor(question_ids)
 
         item = {'image': image, 'question': question_ids}
