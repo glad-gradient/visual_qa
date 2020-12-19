@@ -96,7 +96,7 @@ class Trainer:
 
             answers_ids = answers_ids.detach().numpy()
             answers_ids = answers_ids.reshape(len(answers_ids), 1)
-            actual_answers = batch_sample['actual_answers']
+            actual_answers = np.array(batch_sample['actual_answers'])
 
             # calculate step accuracy
             # acc = min(humans that provided that answer / 3, 1)
@@ -116,7 +116,7 @@ class Trainer:
                     self.logger.info(
                         f'Val Step {step}, '
                         f'loss: {loss:.5f}, '
-                        f'time: {(time.time() - t):.5f}', end='\r'
+                        f'time: {(time.time() - t):.5f}'
                     )
 
         # calculate epoch accuracy
@@ -161,7 +161,7 @@ class Trainer:
                         self.logger.info(
                             f'Val Step {step}, '
                             f'loss: {loss:.5f}, '
-                            f'time: {(time.time() - t):.5f}', end='\r'
+                            f'time: {(time.time() - t):.5f}'
                         )
 
         # calculate epoch accuracy
