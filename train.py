@@ -52,7 +52,7 @@ def main(args):
     train_annotation_file = cfgs['PATH']['ANSWER_DIR'] + '/v2_mscoco_train2014_annotations.json'
     answer_vocab = AnswerVocabulary(train_annotation_file, no_answers)  # only train data
 
-    logger.info('Vocabularies have been builded.')
+    logger.info('Vocabularies have been built.')
 
     transform = torchvision.transforms.Compose([torchvision.transforms.ToTensor(),
                                                 torchvision.transforms.Normalize((0.485, 0.456, 0.406),
@@ -122,6 +122,7 @@ def main(args):
     )
 
     lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer,
         mode='min',
         factor=0.1,
         patience=3,
