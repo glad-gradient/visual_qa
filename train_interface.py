@@ -114,7 +114,7 @@ class Trainer:
             if self.verbose:
                 if step % self.verbose_step == 0:
                     self.logger.info(
-                        f'Val Step {step}, '
+                        f'Step {step}, '
                         f'loss: {loss:.5f}, '
                         f'time: {(time.time() - t):.5f}'
                     )
