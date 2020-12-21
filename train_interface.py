@@ -94,7 +94,7 @@ class Trainer:
             answers_ids, _ = torch.max(output, axis=1)
             loss = self.loss_fn(output, answers)
 
-            answers_ids = answers_ids.detach().numpy()
+            answers_ids = answers_ids.detach().cpu().numpy()
             answers_ids = answers_ids.reshape(len(answers_ids), 1)
             actual_answers = np.array(batch_sample['actual_answers'])
 
@@ -145,7 +145,7 @@ class Trainer:
                 answers_ids, _ = torch.max(output, axis=1)
                 loss = self.loss_fn(output, answers)
 
-                answers_ids = answers_ids.detach().numpy()
+                answers_ids = answers_ids.detach().cpu().numpy()
                 answers_ids = answers_ids.reshape(len(answers_ids), 1)
                 actual_answers = np.array(batch_sample['actual_answers'])
 
