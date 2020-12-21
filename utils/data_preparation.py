@@ -1,54 +1,9 @@
 import json
-import os
 
 import cv2
 import numpy as np
 import torch
 from nltk.tokenize import word_tokenize
-
-from utils.misc import configs
-
-
-def download_vqa(config_file, load_train=True, load_valid=True, load_test=False):
-    cfgs = configs(config_file)
-    image_dir = cfgs['PATH']['IMAGE_DIR']
-    question_dir = cfgs['PATH']['QUESTION_DIR']
-    answer_dir = cfgs['PATH']['ANSWER_DIR']
-
-    # Download and unzip images
-    if load_train:
-        os.system(f'wget http://images.cocodataset.org/zips/train2014.zip -P {image_dir}')
-        os.system(f'unzip {image_dir}/train2014.zip -d {image_dir}/')
-
-    if load_valid:
-        os.system(f'wget http://images.cocodataset.org/zips/val2014.zip -P {image_dir}')
-        os.system(f'unzip {image_dir}/val2014.zip -d {image_dir}/')
-
-    if load_test:
-        os.system(f'wget http://images.cocodataset.org/zips/test2015.zip -P {image_dir}')
-        os.system(f'unzip {image_dir}/test2015.zip -d {image_dir}/')
-
-    # Download and unzip the VQA Questions
-    if load_train:
-        os.system(f'wget https://s3.amazonaws.com/cvmlp/vqa/mscoco/vqa/v2_Questions_Train_mscoco.zip -P {question_dir}')
-        os.system(f'unzip {question_dir}/v2_Questions_Train_mscoco.zip -d {question_dir}')
-
-    if load_valid:
-        os.system(f'wget https://s3.amazonaws.com/cvmlp/vqa/mscoco/vqa/v2_Questions_Val_mscoco.zip -P {question_dir}')
-        os.system(f'unzip {question_dir}/v2_Questions_Val_mscoco.zip -d {question_dir}')
-
-    if load_test:
-        os.system(f'wget https://s3.amazonaws.com/cvmlp/vqa/mscoco/vqa/v2_Questions_Test_mscoco.zip -P {question_dir}')
-        os.system(f'unzip {question_dir}/v2_Questions_Test_mscoco.zip -d {question_dir}')
-
-    # Download and unzip the VQA Annotations
-    if load_train:
-        os.system(f'wget https://s3.amazonaws.com/cvmlp/vqa/mscoco/vqa/v2_Annotations_Train_mscoco.zip -P {answer_dir}')
-        os.system(f'unzip {answer_dir}/v2_Annotations_Train_mscoco.zip -d {answer_dir}')
-
-    if load_valid:
-        os.system(f'wget https://s3.amazonaws.com/cvmlp/vqa/mscoco/vqa/v2_Annotations_Val_mscoco.zip -P {answer_dir}')
-        os.system(f'unzip {answer_dir}/v2_Annotations_Val_mscoco.zip -d {answer_dir}')
 
 
 class DataGenerator(torch.utils.data.Dataset):
