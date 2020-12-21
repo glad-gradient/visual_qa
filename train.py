@@ -41,9 +41,7 @@ def main(args):
     momentum = args.momentum
     weight_decay = args.weight_decay
 
-    logger.info(f'Word embedding model "{cfgs["WORD_EMBEDDING_MODEL_NAME"]}" downloading...')
     word2vec = downloader.load(cfgs['WORD_EMBEDDING_MODEL_NAME'])
-    logger.info('Word embedding model downloaded.')
 
     logger.info('Vocabularies building...')
 
@@ -114,11 +112,15 @@ def main(args):
     logger.info('VisualQA model has been created.')
     model.to(device)
 
-    optimizer = torch.optim.SGD(
+    # optimizer = torch.optim.SGD(
+    #     model.parameters(),
+    #     lr=lr,
+    #     momentum=momentum,
+    #     weight_decay=weight_decay
+    # )
+    optimizer = torch.optim.Adam(
         model.parameters(),
-        lr=lr,
-        momentum=momentum,
-        weight_decay=weight_decay
+        lr=lr
     )
 
     lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
@@ -128,16 +130,6 @@ def main(args):
         patience=3,
         cooldown=0
     )
-
-    # Print model's state_dict
-    logger.info("Model's state_dict:")
-    for param_tensor in model.state_dict():
-        logger.info(param_tensor, "\t", model.state_dict()[param_tensor].size())
-
-    # Print optimizer's state_dict
-    logger.info("Optimizer's state_dict:")
-    for var_name in optimizer.state_dict():
-        logger.info(var_name, "\t", optimizer.state_dict()[var_name])
 
     trainer = Trainer(
         device=device,
