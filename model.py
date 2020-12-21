@@ -5,8 +5,8 @@ import torchvision
 class ImageEncoder(torch.nn.Module):
     def __init__(self, embedding_dim):
         super(ImageEncoder, self).__init__()
-        pretrained_model = torchvision.models.resnet34(pretrained=True)
-        in_features = pretrained_model.fc.in_features  # 512
+        self.model = torchvision.models.resnet34(pretrained=True)
+        in_features = self.model.fc.in_features  # 512
 
         for param in self.model.parameters():
             param.requires_grad = False
