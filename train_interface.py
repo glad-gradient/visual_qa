@@ -91,7 +91,7 @@ class Trainer:
             questions = batch_sample['question'].to(self.device)
             answers = batch_sample['answer'].to(self.device)
             output = self.model(images, questions)
-            answers_ids, _ = torch.max(output, axis=1)
+            _, answers_ids = torch.max(output, axis=1)
             loss = self.loss_fn(output, answers)
 
             answers_ids = answers_ids.detach().cpu().numpy()
