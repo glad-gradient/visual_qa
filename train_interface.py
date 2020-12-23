@@ -43,7 +43,7 @@ class Trainer:
             history['val_loss'].append(val_loss)
             history['val_accuracy'].append(val_acc)
 
-            self.log(f'[RESULT]: Val. Epoch: {self.epoch}/{epochs} val_loss: {val_loss:.5f} val_acc: {val_acc:.5f} time: {(time.time() - t):.5f}')
+            self.log(f'[RESULT]: Val. Epoch: {self.epoch}/{epochs} val_loss: {val_loss:.5f} val_acc: {val_acc:.5f} time: {(time.time() - t):.5f}\n')
 
             if val_loss < self.best_loss_summary:
                 self.best_loss_summary = val_loss
