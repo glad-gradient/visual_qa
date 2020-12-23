@@ -24,6 +24,7 @@ class QuestionEncoder(torch.nn.Module):
     def __init__(self, word_embeddings, word_embedding_dim, hidden_dim, num_layers, embedding_dim):
         super(QuestionEncoder, self).__init__()
         self.word_embeddings = torch.nn.Embedding.from_pretrained(word_embeddings, freeze=True)
+        self.word_embeddings.weight.requires_grad = False
         self.lstm = torch.nn.LSTM(
             input_size=word_embedding_dim,
             hidden_size=hidden_dim,
