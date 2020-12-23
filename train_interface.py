@@ -106,7 +106,7 @@ class Trainer:
 
             loss.backward()
 
-            loss = loss.detach().item()
+            loss = loss.item()
             loss_summary += loss
 
             self.optimizer.step()
@@ -154,7 +154,7 @@ class Trainer:
                 acc_temp[(acc_temp > 1) == True] = 1
                 total += acc_temp.sum()
 
-                loss = loss.detach().item()
+                loss = loss.item()
                 loss_summary += loss
                 if self.verbose:
                     if step % self.verbose_step == 0:
