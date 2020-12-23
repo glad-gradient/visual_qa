@@ -23,6 +23,13 @@ def main(args):
     os.makedirs(args.log_dir, exist_ok=True)
     os.makedirs(args.checkpoint_dir, exist_ok=True)
 
+    image_dir = args.image_dir
+    question_dir = args.question_dir
+    answer_dir = args.answer_dir
+    os.makedirs(image_dir, exist_ok=True)
+    os.makedirs(question_dir, exist_ok=True)
+    os.makedirs(answer_dir, exist_ok=True)
+
     image_size = args.image_size
     batch_size = args.batch_size
     num_workers = args.num_workers
@@ -47,7 +54,7 @@ def main(args):
 
     word_list = word2vec.index_to_key
     question_vocab = Vocabulary(word_list)
-    train_annotation_file = cfgs['PATH']['ANSWER_DIR'] + '/v2_mscoco_train2014_annotations.json'
+    train_annotation_file = answer_dir + '/v2_mscoco_train2014_annotations.json'
     answer_vocab = AnswerVocabulary(train_annotation_file, no_answers)  # only train data
 
     logger.info('Vocabularies have been built.')
@@ -57,12 +64,12 @@ def main(args):
                                                                                  (0.229, 0.224, 0.225))])
 
     train_dataset = DataGenerator(
-        image_dir=cfgs['PATH']['IMAGE_DIR'],
+        image_dir=image_dir,
         image_set='train2014',
         image_size=image_size,
         mode=Modes.TRAIN,
         question_vocab=question_vocab,
-        question_file=cfgs['PATH']['QUESTION_DIR'] + '/v2_OpenEnded_mscoco_train2014_questions.json',
+        question_file=question_dir + '/v2_OpenEnded_mscoco_train2014_questions.json',
         answer_vocab=answer_vocab,
         annotation_file=train_annotation_file,
         transform=transform,
@@ -71,14 +78,14 @@ def main(args):
     logger.info('Train dataset has been created.')
 
     validation_dataset = DataGenerator(
-        image_dir=cfgs['PATH']['IMAGE_DIR'],
+        image_dir=image_dir,
         image_set='val2014',
         image_size=image_size,
         mode=Modes.VALIDATION,
         question_vocab=question_vocab,
-        question_file=cfgs['PATH']['QUESTION_DIR'] + '/v2_OpenEnded_mscoco_val2014_questions.json',
+        question_file=question_dir + '/v2_OpenEnded_mscoco_val2014_questions.json',
         answer_vocab=answer_vocab,
-        annotation_file=cfgs['PATH']['ANSWER_DIR'] + '/v2_mscoco_val2014_annotations.json',
+        annotation_file=answer_dir + '/v2_mscoco_val2014_annotations.json',
         transform=transform,
         max_num_ans=max_num_ans
     )
@@ -112,6 +119,12 @@ def main(args):
     logger.info('VisualQA model has been created.')
     model.to(device)
 
+    params = list()
+    params.extend(list(model.image_encoder.model.fc.parameters()))
+    params.extend(list(model.question_encoder.parameters()))
+    params.extend(list(model.fc1.parameters()))
+    params.extend(list(model.fc2.parameters()))
+
     # optimizer = torch.optim.SGD(
     #     model.parameters(),
     #     lr=lr,
@@ -119,7 +132,7 @@ def main(args):
     #     weight_decay=weight_decay
     # )
     optimizer = torch.optim.Adam(
-        model.parameters(),
+        params,
         lr=lr
     )
 
@@ -152,6 +165,10 @@ if __name__ == '__main__':
     parser.add_argument('--checkpoint_dir', type=str, default='./checkpoints', help='directory for model checkpoints')
     parser.add_argument('--log_dir', type=str, default='./logs', help='directory for logs')
     parser.add_argument('--config_file', type=str, default='./configs.json', help='path to the config file')
+
+    parser.add_argument('--image_dir', type=str, default='./data/images', help='directory for images')
+    parser.add_argument('--question_dir', type=str, default='./data/questions', help='directory for questions')
+    parser.add_argument('--answer_dir', type=str, default='./data/answers', help='directory for answers')
 
     parser.add_argument('--lr', type=float, default=0.001, help='learning rate for training')
     parser.add_argument('--momentum', type=float, default=0.9, help='SGD momentum')
