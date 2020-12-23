@@ -11,7 +11,7 @@ class ImageEncoder(torch.nn.Module):
         for param in self.model.parameters():
             param.requires_grad = False
 
-        self.model.fc = torch.nn.Sequential(torch.nn.Linear(in_features, embedding_dim))
+        self.model.fc = torch.nn.Linear(in_features, embedding_dim)
 
     def forward(self, image):
         features = self.model(image)
