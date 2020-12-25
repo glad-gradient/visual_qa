@@ -116,7 +116,9 @@ class Trainer:
                     self.logger.info(
                         f'Step {step}, '
                         f'loss: {loss:.5f}, '
-                        f'time: {(time.time() - t):.5f}'
+                        f'time: {(time.time() - t):.5f}, '
+                        f'\nANSWER IDS\n: {answers_ids}, '
+                        f'\nACTUAL\n: {actual_answers}.'
                     )
 
         # calculate epoch accuracy
@@ -161,7 +163,9 @@ class Trainer:
                         self.logger.info(
                             f'Val Step {step}, '
                             f'loss: {loss:.5f}, '
-                            f'time: {(time.time() - t):.5f}'
+                            f'time: {(time.time() - t):.5f}, '
+                            f'\nANSWER IDS\n: {answers_ids}, '
+                            f'\nACTUAL\n: {actual_answers}.'
                         )
 
         # calculate epoch accuracy
