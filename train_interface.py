@@ -115,7 +115,9 @@ class Trainer:
             if self.verbose:
                 if step % self.verbose_step == 0:
 
-                    data = {f'{self.epoch}|{step}': {"answers_ids": answers_ids, "actual": actual_answers}}
+                    data = {f'{self.epoch}|{step}': {
+                        "answers_ids": answers_ids.tolist(), "actual": actual_answers.tolist()}
+                    }
                     with open(f'{self.checkpoint_dir}/logs.json', 'r', encoding='utf-8') as f:
                         temp = json.load(f)
                     temp.update(data)
@@ -168,7 +170,9 @@ class Trainer:
                 if self.verbose:
                     if step % self.verbose_step == 0:
 
-                        data = {f'{self.epoch}|{step}_val': {"answers_ids": answers_ids, "actual": actual_answers}}
+                        data = {f'{self.epoch}|{step}_val': {
+                            "answers_ids": answers_ids.tolist(), "actual": actual_answers.tolist()}
+                        }
                         with open(f'{self.checkpoint_dir}/logs.json', 'r', encoding='utf-8') as f:
                             temp = json.load(f)
                         temp.update(data)
