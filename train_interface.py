@@ -1,5 +1,6 @@
 from glob import glob
 import logging
+import json
 import time
 import os
 import matplotlib.pyplot as plt
@@ -113,12 +114,18 @@ class Trainer:
 
             if self.verbose:
                 if step % self.verbose_step == 0:
+
+                    data = {f'{self.epoch}|{step}': {"answers_ids": answers_ids, "actual": actual_answers}}
+                    with open(f'{self.checkpoint_dir}/logs.json', 'r', encoding='utf-8') as f:
+                        temp = json.load(f)
+                    temp.update(data)
+                    with open(f'{self.checkpoint_dir}/logs.json', 'w', encoding='utf-8') as f:
+                        json.dump(temp, f, ensure_ascii=False)
+
                     self.logger.info(
                         f'Step {step}, '
                         f'loss: {loss:.5f}, '
-                        f'time: {(time.time() - t):.5f}, '
-                        f'\nANSWER IDS\n: {answers_ids}, '
-                        f'\nACTUAL\n: {actual_answers}.'
+                        f'time: {(time.time() - t):.5f}'
                     )
 
         # calculate epoch accuracy
@@ -160,12 +167,18 @@ class Trainer:
                 loss_summary += loss
                 if self.verbose:
                     if step % self.verbose_step == 0:
+
+                        data = {f'{self.epoch}|{step}_val': {"answers_ids": answers_ids, "actual": actual_answers}}
+                        with open(f'{self.checkpoint_dir}/logs.json', 'r', encoding='utf-8') as f:
+                            temp = json.load(f)
+                        temp.update(data)
+                        with open(f'{self.checkpoint_dir}/logs.json', 'w', encoding='utf-8') as f:
+                            json.dump(temp, f, ensure_ascii=False)
+
                         self.logger.info(
                             f'Val Step {step}, '
                             f'loss: {loss:.5f}, '
-                            f'time: {(time.time() - t):.5f}, '
-                            f'\nANSWER IDS\n: {answers_ids}, '
-                            f'\nACTUAL\n: {actual_answers}.'
+                            f'time: {(time.time() - t):.5f}'
                         )
 
         # calculate epoch accuracy
