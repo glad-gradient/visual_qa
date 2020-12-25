@@ -94,13 +94,13 @@ def main(args):
     train_loader = torch.utils.data.DataLoader(
         dataset=train_dataset,
         batch_size=batch_size,
-        shuffle=True,
+        shuffle=False,
         num_workers=num_workers
     )
     valid_loader = torch.utils.data.DataLoader(
         dataset=validation_dataset,
         batch_size=batch_size,
-        shuffle=True,
+        shuffle=False,
         num_workers=num_workers
     )
 
