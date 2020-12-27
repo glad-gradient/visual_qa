@@ -35,6 +35,7 @@ def main(args):
     num_workers = args.num_workers
     no_answers = args.no_answers
     num_epochs = args.num_epochs
+    val_size = args.val_size
     verbose_step = args.verbose_step
     verbose = args.verbose
     max_num_ans = args.max_num_ans
@@ -94,13 +95,13 @@ def main(args):
     train_loader = torch.utils.data.DataLoader(
         dataset=train_dataset,
         batch_size=batch_size,
-        shuffle=False,
+        shuffle=True,
         num_workers=num_workers
     )
     valid_loader = torch.utils.data.DataLoader(
         dataset=validation_dataset,
         batch_size=batch_size,
-        shuffle=False,
+        shuffle=True,
         num_workers=num_workers
     )
 
@@ -119,11 +120,11 @@ def main(args):
     logger.info('VisualQA model has been created.')
     model.to(device)
 
-    params = list()
-    params.extend(list(model.image_encoder.model.fc.parameters()))
-    params.extend(list(model.question_encoder.parameters()))
-    params.extend(list(model.fc1.parameters()))
-    params.extend(list(model.fc2.parameters()))
+    # params = list()
+    # params.extend(list(model.image_encoder.model.fc.parameters()))
+    # params.extend(list(model.question_encoder.parameters()))
+    # params.extend(list(model.fc1.parameters()))
+    # params.extend(list(model.fc2.parameters()))
 
     # optimizer = torch.optim.SGD(
     #     model.parameters(),
@@ -132,7 +133,7 @@ def main(args):
     #     weight_decay=weight_decay
     # )
     optimizer = torch.optim.Adam(
-        params,
+        model.parameters(),
         lr=lr
     )
 
@@ -156,7 +157,7 @@ def main(args):
         lr_scheduler=lr_scheduler
     )
 
-    trainer.fit(train_loader, valid_loader, num_epochs)
+    trainer.fit(train_loader, valid_loader, num_epochs, val_size)
 
 
 if __name__ == '__main__':
@@ -177,6 +178,7 @@ if __name__ == '__main__':
     parser.add_argument('--image_size', type=int, default=224, help='output image size')
     parser.add_argument('--batch_size', type=int, default=256, help='batch size')
     parser.add_argument('--num_epochs', type=int, default=30, help='number of epochs')
+    parser.add_argument('--val_size', type=float, default=0.3, help='part of the valid dataset')
     parser.add_argument('--num_workers', type=int, default=cpu_count(), help='number of processes working on cpu')
 
     parser.add_argument('--no_answers', type=int, default=1000, help='the number of answers to be kept in vocab')
