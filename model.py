@@ -34,17 +34,6 @@ class QuestionEncoder(torch.nn.Module):
         self.fc = torch.nn.Linear(2 * num_layers * hidden_dim, embedding_dim)
         self.tanh = torch.nn.Tanh()
 
-    # def forward(self, question):
-    #     embeds = self.word_embeddings(question)  # (batch_size, max_qst_length, word_embed_size=300)
-    #     _, (hidden, cell) = self.lstm(embeds)  # (num_layers, batch_size, hidden_size=512)
-    #     features = torch.cat((hidden, cell), dim=2)  # (num_layers, batch_size, 2*hidden_size)
-    #     features = features.permute(1, 0, 2)  # (batch_size, num_layers, 2*hidden_size)
-    #     features = features.reshape(features.size()[0], -1)  # (batch_size, 2*num_layers*hidden_size)
-    #     features = self.fc(features)  # (batch_size, embedding_dim)
-    #     features = self.tanh(features)
-    #
-    #     return features
-
     def forward(self, question):
         embeds = self.word_embeddings(question)  # (batch_size, max_qst_length, word_embed_size=300)
         _, (hidden, cell) = self.lstm(embeds)  # (num_layers, batch_size, hidden_size=512)
@@ -67,19 +56,6 @@ class VisualQAModel(torch.nn.Module):
         self.fc2 = torch.nn.Linear(answer_vocab_size, answer_vocab_size)
         self.tanh = torch.nn.Tanh()
         self.dropout = torch.nn.Dropout(0.5)
-
-    # def forward(self, image, question):
-    #     image_features = self.image_encoder(image)
-    #     question_features = self.question_encoder(question)
-    #     combined_embeds = torch.mul(image_features, question_features)
-    #     combined_embeds = self.fc1(combined_embeds)
-    #     combined_embeds = self.dropout(combined_embeds)
-    #     combined_embeds = self.tanh(combined_embeds)
-    #     combined_embeds = self.fc2(combined_embeds)
-    #     combined_embeds = self.dropout(combined_embeds)
-    #     combined_embeds = self.tanh(combined_embeds)
-    #
-    #     return combined_embeds
 
     def forward(self, image, question):
         image_features = self.image_encoder(image)
