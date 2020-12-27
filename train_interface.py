@@ -128,7 +128,7 @@ class Trainer:
     def validation(self, valid_loader, val_size):
         self.model.eval()
 
-        no_steps = val_size * int(len(valid_loader.dataset) / valid_loader.batch_size)
+        no_steps = int(val_size * len(valid_loader.dataset) / valid_loader.batch_size)
         total_acc = 0.0
         loss_summary = 0.0
 
