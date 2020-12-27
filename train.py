@@ -120,11 +120,11 @@ def main(args):
     logger.info('VisualQA model has been created.')
     model.to(device)
 
-    # params = list()
-    # params.extend(list(model.image_encoder.model.fc.parameters()))
-    # params.extend(list(model.question_encoder.parameters()))
-    # params.extend(list(model.fc1.parameters()))
-    # params.extend(list(model.fc2.parameters()))
+    params = list()
+    params.extend(list(model.image_encoder.model.fc.parameters()))
+    params.extend(list(model.question_encoder.parameters()))
+    params.extend(list(model.fc1.parameters()))
+    params.extend(list(model.fc2.parameters()))
 
     # optimizer = torch.optim.SGD(
     #     model.parameters(),
@@ -133,7 +133,7 @@ def main(args):
     #     weight_decay=weight_decay
     # )
     optimizer = torch.optim.Adam(
-        model.parameters(),
+        params,
         lr=lr
     )
 
