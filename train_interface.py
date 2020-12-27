@@ -1,6 +1,5 @@
 from glob import glob
 import logging
-import json
 import time
 import os
 import matplotlib.pyplot as plt
@@ -28,7 +27,7 @@ class Trainer:
         self.verbose_step = verbose_step
         self.log(f'Trainer is ready. Device is {self.device}')
 
-    def fit(self, train_loader, valid_loader, epochs):
+    def fit(self, train_loader, valid_loader, epochs, val_size=0.3):
         history = {'loss': list(), 'accuracy': list(), 'val_loss': list(), 'val_accuracy': list()}
 
         for _ in range(epochs):
@@ -40,7 +39,7 @@ class Trainer:
             self.log(f'[RESULT]: Train. Epoch: {self.epoch}/{epochs} loss: {loss:.5f} acc: {accuracy:.5f} time: {(time.time() - t):.5f}')
             self.save(f'{self.checkpoint_dir}/last-checkpoint.bin')
 
-            val_loss, val_acc = self.validation(valid_loader)
+            val_loss, val_acc = self.validation(valid_loader, val_size)
             history['val_loss'].append(val_loss)
             history['val_accuracy'].append(val_acc)
 
@@ -49,7 +48,7 @@ class Trainer:
             if val_loss < self.best_loss_summary:
                 self.best_loss_summary = val_loss
                 self.save(f'{self.checkpoint_dir}/best-checkpoint-{str(self.epoch).zfill(3)}epoch.bin')
-                for path in sorted(glob(f'{self.checkpoint_dir}/best-checkpoint-*epoch.bin'))[:-3]:
+                for path in sorted(glob(f'{self.checkpoint_dir}/best-checkpoint-*epoch.bin'))[:-1]:
                     os.remove(path)
 
             self.epoch += 1
@@ -80,8 +79,8 @@ class Trainer:
     def train_one_epoch(self, train_loader):
         self.model.train()
 
-        no_steps = len(train_loader.dataset) / train_loader.batch_size
-        total = 0.0
+        no_steps = int(len(train_loader.dataset) / train_loader.batch_size)
+        total_acc = 0.0
         loss_summary = 0.0
         t = time.time()
 
@@ -101,9 +100,8 @@ class Trainer:
 
             # calculate step accuracy
             # acc = min(humans that provided that answer / 3, 1)
-            acc_temp = (actual_answers == answers_ids).sum(axis=1) / 3.0
-            acc_temp[(acc_temp > 1) == True] = 1
-            total += acc_temp.sum()
+            acc = (actual_answers == answers_ids).sum(axis=1) / 3.0
+            total_acc += np.clip(acc, a_min=0., a_max=1.).sum()
 
             loss.backward()
 
@@ -114,16 +112,6 @@ class Trainer:
 
             if self.verbose:
                 if step % self.verbose_step == 0:
-
-                    data = {f'{self.epoch}|{step}': {
-                        "answers_ids": answers_ids.tolist(), "actual": actual_answers.tolist()}
-                    }
-                    with open(f'{self.checkpoint_dir}/logs.json', 'r', encoding='utf-8') as f:
-                        temp = json.load(f)
-                    temp.update(data)
-                    with open(f'{self.checkpoint_dir}/logs.json', 'w', encoding='utf-8') as f:
-                        json.dump(temp, f, ensure_ascii=False)
-
                     self.logger.info(
                         f'Step {step}, '
                         f'loss: {loss:.5f}, '
@@ -131,21 +119,24 @@ class Trainer:
                     )
 
         # calculate epoch accuracy
-        accuracy = total / len(train_loader.dataset)
+        accuracy = total_acc / len(train_loader.dataset)
         # epoch loss
         loss_summary = loss_summary / no_steps
 
         return loss_summary, accuracy
 
-    def validation(self, valid_loader):
+    def validation(self, valid_loader, val_size):
         self.model.eval()
 
-        no_steps = len(valid_loader.dataset) / valid_loader.batch_size
-        total = 0.0
+        no_steps = val_size * int(len(valid_loader.dataset) / valid_loader.batch_size)
+        total_acc = 0.0
         loss_summary = 0.0
 
         t = time.time()
         for step, batch_sample in enumerate(valid_loader):
+            if no_steps == step:
+                break
+
             with torch.no_grad():
                 images = batch_sample['image'].to(self.device)
                 questions = batch_sample['question'].to(self.device)
@@ -153,7 +144,7 @@ class Trainer:
 
                 output = self.model(images, questions)
 
-                answers_ids, _ = torch.max(output, axis=1)
+                _, answers_ids = torch.max(output, axis=1)
                 loss = self.loss_fn(output, answers)
 
                 answers_ids = answers_ids.detach().cpu().numpy()
@@ -161,24 +152,13 @@ class Trainer:
                 actual_answers = np.array(batch_sample['actual_answers'])
 
                 # calculate step accuracy
-                acc_temp = (actual_answers == answers_ids).sum(axis=1) / 3.0
-                acc_temp[(acc_temp > 1) == True] = 1
-                total += acc_temp.sum()
+                acc = (actual_answers == answers_ids).sum(axis=1) / 3.0
+                total_acc += np.clip(acc, a_min=0., a_max=1.).sum()
 
                 loss = loss.item()
                 loss_summary += loss
                 if self.verbose:
                     if step % self.verbose_step == 0:
-
-                        data = {f'{self.epoch}|{step}_val': {
-                            "answers_ids": answers_ids.tolist(), "actual": actual_answers.tolist()}
-                        }
-                        with open(f'{self.checkpoint_dir}/logs.json', 'r', encoding='utf-8') as f:
-                            temp = json.load(f)
-                        temp.update(data)
-                        with open(f'{self.checkpoint_dir}/logs.json', 'w', encoding='utf-8') as f:
-                            json.dump(temp, f, ensure_ascii=False)
-
                         self.logger.info(
                             f'Val Step {step}, '
                             f'loss: {loss:.5f}, '
@@ -186,7 +166,7 @@ class Trainer:
                         )
 
         # calculate epoch accuracy
-        accuracy = total / len(valid_loader.dataset)
+        accuracy = total_acc / (no_steps * valid_loader.batch_size)
         # epoch loss
         loss_summary = loss_summary / no_steps
 
