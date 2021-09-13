@@ -1,0 +1,6 @@
+numpy==1.17.4
+gensim==4.0.0b0
+torch>=1.7.0
+torchvision==0.10.0
+cv2==4.4.0.46
+nltk==3.5
