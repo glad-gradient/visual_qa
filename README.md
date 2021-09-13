@@ -4,8 +4,7 @@
     instead of training word embeddings from scratch.
 
 ### Paper
-    "VQA: Visual Question Answering"
-    URL: https://arxiv.org/abs/1505.00468 
+   [VQA: Visual Question Answering](https://arxiv.org/abs/1505.00468) 
     
 ### Dataset
-    URL: https://visualqa.org/download.html
+   [VQA](https://visualqa.org/download.html)
